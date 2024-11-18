@@ -7,6 +7,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <style>
+        html {
+            font-size: 1rem;
+        }
+
+        @include media-breakpoint-up(sm) {
+            html {
+                font-size: 1.2rem;
+            }
+        }
+
+        @include media-breakpoint-up(md) {
+            html {
+                font-size: 1.4rem;
+            }
+        }
+
+        @include media-breakpoint-up(lg) {
+            html {
+                font-size: 1.6rem;
+            }
+        }
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa; /* Blanco grisáceo */
@@ -54,8 +75,9 @@
     <header>
         <nav class="navbar navbar-expand-lg sticky-top">
             <div class="container">
-                <a class="navbar-brand" href="../index.php">
-                    <img src="<?php echo ($page_title == "Inicio") ? './sources/logo-hammer.svg' : '../sources/logo-hammer.svg' ?>" alt="Logo" width="40" height="40">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="../index.php">
+                    <img src="<?php echo ($page_title == "Inicio") ? './sources/logo-hammer.svg' : '../sources/logo-hammer.svg'; ?>" alt="Logo" width="40" height="40">
+                    <h3 class="m-0"><strong>Ferrepinturas Colormax</strong></h3>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -82,6 +104,7 @@
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="top: 100%; left: 0;">
                                 <button class="dropdown-item" type="button" id="Cuenta">Cuenta</button>
                                 <button class="dropdown-item" type="button" id="Inventario">Inventario</button>
+                                <button class="dropdown-item" type="button" id="Proveedores">Proveedores</button>
                                 <button class="dropdown-item" type="button" id="CerrarSesion">Cerrar sesión</button>
                             </div>
                         </div>
@@ -112,6 +135,52 @@
                         echo '
                         <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0">
                             <button class="btn btn-danger" id="CancelarEliminarVenta">Cancelar</button>
+                        </div>
+                        ';
+                        break;
+                    case "Perfil":
+                        echo '
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0">
+                            <button class="btn btn-secondary" id="VolverPerfil">Volver</button>
+                        </div>
+                        ';
+                        break;
+                    case "Inventario":
+                        echo '
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0 dropdown">
+                            <button class="btn btn-primary" id="NuevoProducto">Nuevo</button>
+                            <button class="btn btn-secondary" id="ModificarProducto">Modificar</button>
+                            <button class="btn btn-danger" id="EliminarProducto">Eliminar</button>
+                            <button class="btn dropdown-toggle d-flex align-items-center" id="profileDropdown" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" style="background: none; border: none; padding: 0;">
+                                <img src="../sources/person-circle.svg" alt="Perfil" class="rounded-circle" style="width: 30px; height: 30px;">
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="top: 100%; left: 0;">
+                                <button class="dropdown-item" type="button" id="Cuenta">Cuenta</button>
+                                <button class="dropdown-item" type="button" id="Ventas">Ventas</button>
+                                <button class="dropdown-item" type="button" id="Proveedores">Proveedores</button>
+                                <button class="dropdown-item" type="button" id="CerrarSesion">Cerrar sesión</button>
+                            </div>
+                        </div>
+                        ';
+                        break;
+                    case "AgregarProducto":
+                        echo '
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0">
+                            <button class="btn btn-danger" id="CancelarAgregarProducto">Cancelar</button>
+                        </div>
+                        ';
+                        break;
+                    case "ModificarProducto":
+                        echo '
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0">
+                            <button class="btn btn-danger" id="CancelarModificarProducto">Cancelar</button>
+                        </div>
+                        ';
+                        break;
+                    case "EliminarProducto":
+                        echo '
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2 mt-3 mt-md-0">
+                            <button class="btn btn-danger" id="CancelarEliminarProducto">Cancelar</button>
                         </div>
                         ';
                         break;
@@ -152,10 +221,14 @@
                 });
 
                 document.getElementById('Cuenta').addEventListener('click', function() {
-                    redirectToURL('#');
+                    redirectToURL('./perfil.php');
                 });
 
                 document.getElementById('Inventario').addEventListener('click', function() {
+                    redirectToURL('./inventario.php');
+                });
+
+                document.getElementById('Proveedores').addEventListener('click', function() {
                     redirectToURL('#');
                 });
 
@@ -181,6 +254,55 @@
             case "EliminarVenta":
                 document.getElementById('CancelarEliminarVenta').addEventListener('click', function() {
                     redirectToURL('./ventas.php');
+                });
+                break;
+            case "Perfil":
+                document.getElementById('VolverPerfil').addEventListener('click', function() {
+                    redirectToURL('./ventas.php');
+                });
+                break;
+            case "Inventario":
+                document.getElementById('NuevoProducto').addEventListener('click', function() {
+                    redirectToURL('./nuevo_producto.php');
+                });
+
+                document.getElementById('ModificarProducto').addEventListener('click', function() {
+                    redirectToURL('./modificar_producto.php');
+                });
+
+                document.getElementById('EliminarProducto').addEventListener('click', function() {
+                    redirectToURL('./eliminar_producto.php');
+                });
+
+                document.getElementById('Cuenta').addEventListener('click', function() {
+                    redirectToURL('./perfil.php');
+                });
+
+                document.getElementById('Ventas').addEventListener('click', function() {
+                    redirectToURL('./ventas.php');
+                });
+
+                document.getElementById('Proveedores').addEventListener('click', function() {
+                    redirectToURL('#');
+                });
+
+                document.getElementById('CerrarSesion').addEventListener('click', function() {
+                    redirectToURL('../index.php');
+                });
+                break;
+            case "AgregarProducto":
+                document.getElementById('CancelarAgregarProducto').addEventListener('click', function() {
+                    redirectToURL('./inventario.php');
+                });
+                break;
+            case "ModificarProducto":
+                document.getElementById('CancelarModificarProducto').addEventListener('click', function() {
+                    redirectToURL('./inventario.php');
+                });
+                break;
+            case "EliminarProducto":
+                document.getElementById('CancelarEliminarProducto').addEventListener('click', function() {
+                    redirectToURL('./inventario.php');
                 });
                 break;
         }

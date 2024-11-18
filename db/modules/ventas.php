@@ -4,6 +4,7 @@ include_once 'header.php';
 ?>
 
 <main class="container my-5">
+    <h1>Ventas</h1>
     <section class="d-flex align-items-center my-4">
         <span class="me-2">Filtrar de:</span>
         <input type="date" class="form-control me-2" id="filterDateFrom" name="filterDateFrom" style="max-width: 200px;">
