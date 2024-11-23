@@ -1,140 +1,59 @@
-
--- TODO Debo verificar estas vistas, creo que algunas no son lógicas o pueden resultar innecesarias. Hay indicios de que GPT alucinó en algunos casos.
-
--- Vista de ventas, cliente y producto
-CREATE VIEW VistaVentasDetalle AS
+-- Vista para ventas.php
+create view ventas_view as
 SELECT 
-    v.ID AS id_venta,
-    v.codigo AS codigo_venta,
-    v.fecha AS fecha_venta,
-    c.NID AS cliente_NID,
-    c.primer_nombre AS cliente_primer_nombre,
-    c.segundo_nombre AS cliente_segundo_nombre,
-    c.primer_apellido AS cliente_primer_apellido,
-    c.segundo_apellido AS cliente_segundo_apellido,
-    p.nombre AS producto_nombre,
-    p.precio_compra AS precio_producto,
-    mp.nombre AS metodo_pago,
-    u.NID AS vendedor_NID,
-    u.primer_nombre AS vendedor_primer_nombre,
-    u.segundo_nombre AS vendedor_segundo_nombre
-FROM Ventas v
-JOIN Clientes c ON v.id_cliente = c.NID
-JOIN Metodos_de_pago mp ON v.id_metodo_pago = mp.ID
-JOIN Usuarios u ON v.id_usuario = u.NID
-JOIN Productos p ON p.ID = v.id_producto;  -- Asumiendo que se tienen productos en cada venta
+    ventas.ID AS id,
+    ventas.codigo_venta AS codigo,
+    productos.nombre AS producto,
+    ventas.cantidad,
+    productos.precio_compra AS producto_precio,
+    productos.porcentaje_ganancia AS producto_ganancia,
+    ventas.fecha AS fecha_registro,
+    clientes.primer_nombre AS cliente_primer_nombre,
+    clientes.segundo_nombre AS cliente_segundo_nombre,
+    clientes.primer_apellido AS cliente_primer_apellido,
+    clientes.segundo_apellido AS cliente_segundo_apellido,
+    usuarios.primer_nombre AS usuario_primer_nombre,
+    usuarios.segundo_nombre AS usuario_segundo_nombre,
+    usuarios.primer_apellido AS usuario_primer_apellido,
+    usuarios.segundo_apellido AS usuario_segundo_apellido,
+    metodos_de_pago.nombre AS metodo_de_pago,
+    ventas.notas AS notas
+FROM Ventas
+JOIN Productos ON Ventas.id_producto = Productos.ID
+JOIN Clientes ON Ventas.id_cliente = Clientes.NID
+JOIN Usuarios ON Ventas.id_usuario = Usuarios.NID
+JOIN Metodos_de_pago ON Ventas.id_metodo_pago = Metodos_de_pago.ID;
 
--- Productos con categoría
-CREATE VIEW VistaProductosConCategoria AS
-SELECT 
-    p.ID AS id_producto,
-    p.nombre AS producto_nombre,
-    p.descripcion AS producto_descripcion,
-    c.nombre AS categoria_nombre,
-    p.precio_compra,
-    p.cantidad_actual,
-    p.cantidad_minima
-FROM Productos p
-JOIN Categorias c ON p.id_categoria = c.ID;
+-- Vista para invetario.php
+CREATE VIEW inventario AS
+SELECT
+	productos.ID as id,
+    productos.nombre as nombre,
+    productos.descripcion as descripcion,
+    categorias.nombre as categoria,
+    productos.precio_compra as precio_compra,
+    productos.porcentaje_ganancia as ganancia,
+    productos.cantidad_actual as stock_actual,
+    productos.cantidad_minima as stock_minimo
+from productos join categorias on productos.id_categoria = categorias.ID;
 
--- Clientes con ventas realizadas
-CREATE VIEW VistaClientesVentas AS
-SELECT 
-    c.NID AS cliente_NID,
-    c.primer_nombre AS cliente_primer_nombre,
-    c.segundo_nombre AS cliente_segundo_nombre,
-    c.primer_apellido AS cliente_primer_apellido,
-    c.segundo_apellido AS cliente_segundo_apellido,
-    COUNT(v.ID) AS total_ventas,
-    SUM(p.precio_compra) AS total_gastado
-FROM Clientes c
-LEFT JOIN Ventas v ON c.NID = v.id_cliente
-JOIN Productos p ON v.id_producto = p.ID
-GROUP BY c.NID;
+-- Vista para proveedores.php
+create view proveedores_con_vendedores as
+select
+	proveedores.rut,
+    proveedores.nombre as nombre_proveedor,
+    proveedores.telefono1 as proveedor_telefono_1,
+    proveedores.telefono2 as proveedor_telefono_2,
+    proveedores.correo as proveedor_correo,
+    proveedores.direccion,
+    vendedores.NID,
+    vendedores.primer_nombre,
+    vendedores.segundo_nombre,
+    vendedores.primer_apellido,
+    vendedores.segundo_apellido,
+    vendedores.telefono1,
+    vendedores.telefono2,
+    vendedores.correo as vendedor_correo
+from proveedores left join vendedores on proveedores.RUT = vendedores.id_proveedor
+order by proveedores.nombre, vendedores.primer_nombre;
 
--- Inventario de productos
-CREATE VIEW VistaInventarioProductos AS
-SELECT 
-    p.ID AS id_producto,
-    p.nombre AS producto_nombre,
-    p.descripcion AS producto_descripcion,
-    c.nombre AS categoria_nombre,
-    p.cantidad_actual,
-    p.cantidad_minima,
-    p.precio_compra
-FROM Productos p
-JOIN Categorias c ON p.id_categoria = c.ID
-WHERE p.cantidad_actual < p.cantidad_minima;
-
--- Compras con proveedor y productos
-CREATE VIEW VistaComprasDetalle AS
-SELECT 
-    c.ID AS id_compra,
-    c.fecha_orden AS fecha_orden,
-    c.total_pagar AS total_pagar,
-    c.fecha_pago AS fecha_pago,
-    p.nombre AS producto_nombre,
-    p.precio_compra,
-    pr.nombre AS proveedor_nombre
-FROM Compras c
-JOIN Proveedores pr ON c.id_proveedor = pr.RUT
-JOIN Productos p ON p.ID = c.id_producto;  -- Si la tabla "Productos_Compras" está involucrada, puedes ajustar aquí
-
--- Productos con proveedores
-CREATE VIEW VistaProductosProveedores AS
-SELECT 
-    p.ID AS id_producto,
-    p.nombre AS producto_nombre,
-    pr.RUT AS proveedor_RUT,
-    pr.nombre AS proveedor_nombre
-FROM Productos p
-JOIN Proveedores pr ON p.id_proveedor = pr.RUT;
-
--- Productos con ventas
-CREATE VIEW VistaProductosEnVentas AS
-SELECT 
-    p.ID AS id_producto,
-    p.nombre AS producto_nombre,
-    SUM(vp.cantidad) AS cantidad_vendida
-FROM Productos p
-JOIN Ventas v ON v.id_producto = p.ID
-GROUP BY p.ID;
-
--- Métodos de pago con ventas
-CREATE VIEW VistaMetodosPagoVentas AS
-SELECT 
-    mp.nombre AS metodo_pago,
-    COUNT(v.ID) AS total_ventas,
-    SUM(p.precio_compra) AS total_ingresos
-FROM Metodos_de_pago mp
-JOIN Ventas v ON v.id_metodo_pago = mp.ID
-JOIN Productos p ON v.id_producto = p.ID
-GROUP BY mp.ID;
-
--- Proveedores con ventas de sus productos
-CREATE VIEW VistaProveedoresVentasProductos AS
-SELECT 
-    pr.RUT AS proveedor_RUT,
-    pr.nombre AS proveedor_nombre,
-    p.nombre AS producto_nombre,
-    SUM(vp.cantidad) AS cantidad_vendida
-FROM Proveedores pr
-JOIN Productos p ON pr.RUT = p.id_proveedor
-JOIN Ventas v ON p.ID = v.id_producto
-GROUP BY pr.RUT, p.ID;
-
--- Resumen de ventas y compras
-CREATE VIEW VistaResumenVentasCompras AS
-SELECT 
-    'Ventas' AS tipo_transaccion,
-    COUNT(v.ID) AS total_ventas,
-    SUM(p.precio_compra) AS ingresos
-FROM Ventas v
-JOIN Productos p ON v.id_producto = p.ID
-UNION ALL
-SELECT 
-    'Compras' AS tipo_transaccion,
-    COUNT(c.ID) AS total_compras,
-    SUM(p.precio_compra) AS egresos
-FROM Compras c
-JOIN Productos p ON c.id_producto = p.ID;

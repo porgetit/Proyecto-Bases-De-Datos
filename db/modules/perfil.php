@@ -1,19 +1,24 @@
 <?php 
 $page_title = "Perfil";
 include_once 'header.php'; 
+require_once '../config/connection.php';
+
+//$query = "";
+
+// TODO Para poder conectar esta página tengo que implementar el login para así obtener el NID del usuario.
 
 // Datos de prueba para el usuario
-$user_data = [
-    'primer_nombre' => 'Juan',
-    'segundo_nombre' => 'Carlos',
-    'primer_apellido' => 'Pérez',
-    'segundo_apellido' => 'Gómez',
-    'telefono_1' => '123456789',
-    'telefono_2' => '987654321',
-    'correo' => 'juan.perez@example.com',
-    'direccion' => 'Calle Falsa 123',
-    'tipo' => 'Administrador'
-];
+// $user_data = [
+//     'primer_nombre' => 'Juan',
+//     'segundo_nombre' => 'Carlos',
+//     'primer_apellido' => 'Pérez',
+//     'segundo_apellido' => 'Gómez',
+//     'telefono_1' => '123456789',
+//     'telefono_2' => '987654321',
+//     'correo' => 'juan.perez@example.com',
+//     'direccion' => 'Calle Falsa 123',
+//     'tipo' => 'Administrador'
+// ];
 ?>
 
 <main class="container my-5">

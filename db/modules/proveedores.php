@@ -1,121 +1,107 @@
 <?php 
 $page_title = "Proveedores";
-include_once 'header.php'; 
+include_once 'header.php';
 
-// Información de prueba
-$empresa = [
-    "rut" => "12345678-9",
-    "nombre" => "Distribuciones La Excelencia S.A.",
-    "telefono_1" => "3001234567",
-    "telefono_2" => "3017654321",
-    "correo" => "contacto@excelencia.com",
-    "direccion" => "Calle 45 #23-89, Bogotá"
-];
+require_once '../config/connection.php';
 
-$vendedores = [
-    [
-        "nid" => "1023456789",
-        "primer_nombre" => "Carlos",
-        "segundo_nombre" => "Alberto",
-        "primer_apellido" => "Pérez",
-        "segundo_apellido" => "Gómez",
-        "telefono_1" => "3104567890",
-        "telefono_2" => "3210987654",
-        "correo" => "carlos.perez@excelencia.com"
-    ],
-    [
-        "nid" => "1034567890",
-        "primer_nombre" => "María",
-        "segundo_nombre" => "Luisa",
-        "primer_apellido" => "Ramírez",
-        "segundo_apellido" => "Torres",
-        "telefono_1" => "3112345678",
-        "telefono_2" => "",
-        "correo" => "maria.ramirez@excelencia.com"
-    ]
-];
+// Consulta a la vista para obtener la información de proveedores y vendedores
+$conn = new ConexionDB();
+$query = "SELECT * FROM proveedores_con_vendedores";
+$result = $conn->ejecutarConsulta($query);
+
+$proveedores = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $rut = $row['rut'];
+
+        // Inicializamos el proveedor si no existe
+        if (!isset($proveedores[$rut])) {
+            $proveedores[$rut] = [
+                "nombre" => $row['nombre_proveedor'],
+                "telefono_1" => $row['proveedor_telefono_1'],
+                "telefono_2" => $row['proveedor_telefono_2'],
+                "correo" => $row['proveedor_correo'],
+                "direccion" => $row['direccion'],
+                "vendedores" => [] // Inicializamos el subarreglo
+            ];
+        }
+
+        // Agregar cada vendedor al subarreglo de "vendedores"
+        if (!empty($row['NID'])) { // FIXME Solo se muestra el último vendedor procesado
+            $nuevo_vendedor = [
+                "nid" => $row['NID'],
+                "primer_nombre" => $row['primer_nombre'],
+                "segundo_nombre" => $row['segundo_nombre'],
+                "primer_apellido" => $row['primer_apellido'],
+                "segundo_apellido" => $row['segundo_apellido'],
+                "telefono_1" => $row['telefono1'],
+                "telefono_2" => $row['telefono2'],
+                "correo" => $row['vendedor_correo']
+            ];
+
+            // Usamos array_push para evitar sobrescribir
+            array_push($proveedores[$rut]['vendedores'], $nuevo_vendedor);
+        }
+    }
+}
 ?>
 
 <main class="container my-5">
     <h1 class="text-primary">Gestión de Proveedores</h1>
-    <p class="text-muted">Utilice el cuadro de búsqueda para encontrar proveedores por producto o empresa.</p>
+    <p class="text-muted">Lista de todos los proveedores con sus vendedores asociados.</p>
 
-    <!-- Cuadro de búsqueda -->
-    <form id="searchForm" class="mb-4">
-        <div class="mb-3">
-            <label for="searchInput" class="form-label">Buscar</label>
-            <input type="text" class="form-control" id="searchInput" placeholder="Ingrese el nombre del producto o empresa" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Buscar</button>
-    </form>
+    <!-- Bloques de Proveedores -->
+    <?php foreach ($proveedores as $rut => $proveedor): ?>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-success"><?php echo htmlspecialchars($proveedor['nombre']); ?></h5>
+                <p><strong>RUT:</strong> <?php echo htmlspecialchars($rut); ?></p>
+                <p><strong>Teléfono 1:</strong> <?php echo htmlspecialchars($proveedor['telefono_1']); ?></p>
+                <p><strong>Teléfono 2:</strong> <?php echo $proveedor['telefono_2'] ?: 'N/A'; ?></p>
+                <p><strong>Correo:</strong> <?php echo htmlspecialchars($proveedor['correo']); ?></p>
+                <p><strong>Dirección:</strong> <?php echo htmlspecialchars($proveedor['direccion']); ?></p>
 
-    <!-- Información de la Empresa -->
-    <div class="card shadow-sm mb-4" id="empresaInfo">
-        <div class="card-body">
-            <h5 class="card-title text-success">Información de la Empresa</h5>
-            <p><strong>RUT:</strong> <?php echo $empresa['rut']; ?></p>
-            <p><strong>Nombre:</strong> <?php echo $empresa['nombre']; ?></p>
-            <p><strong>Teléfono 1:</strong> <?php echo $empresa['telefono_1']; ?></p>
-            <p><strong>Teléfono 2:</strong> <?php echo $empresa['telefono_2']; ?></p>
-            <p><strong>Correo:</strong> <?php echo $empresa['correo']; ?></p>
-            <p><strong>Dirección:</strong> <?php echo $empresa['direccion']; ?></p>
-        </div>
-    </div>
-
-    <!-- Lista de Vendedores -->
-    <div class="card shadow-sm" id="vendedoresInfo">
-        <div class="card-body">
-            <h5 class="card-title text-secondary">Vendedores Asociados</h5>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>NID</th>
-                            <th>Primer Nombre</th>
-                            <th>Segundo Nombre</th>
-                            <th>Primer Apellido</th>
-                            <th>Segundo Apellido</th>
-                            <th>Teléfono 1</th>
-                            <th>Teléfono 2</th>
-                            <th>Correo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($vendedores as $vendedor): ?>
-                        <tr>
-                            <td><?php echo $vendedor['nid']; ?></td>
-                            <td><?php echo $vendedor['primer_nombre']; ?></td>
-                            <td><?php echo $vendedor['segundo_nombre']; ?></td>
-                            <td><?php echo $vendedor['primer_apellido']; ?></td>
-                            <td><?php echo $vendedor['segundo_apellido']; ?></td>
-                            <td><?php echo $vendedor['telefono_1']; ?></td>
-                            <td><?php echo $vendedor['telefono_2'] ?: 'N/A'; ?></td>
-                            <td><?php echo $vendedor['correo']; ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <!-- Vendedores asociados -->
+                <?php if (!empty($proveedor['vendedores'])): ?>
+                    <div class="mt-3">
+                        <h6 class="text-secondary">Vendedores Asociados:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>NID</th>
+                                        <th>Primer Nombre</th>
+                                        <th>Segundo Nombre</th>
+                                        <th>Primer Apellido</th>
+                                        <th>Segundo Apellido</th>
+                                        <th>Teléfono 1</th>
+                                        <th>Teléfono 2</th>
+                                        <th>Correo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($proveedor['vendedores'] as $vendedor): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($vendedor['nid']); ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['primer_nombre']); ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['segundo_nombre']); ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['primer_apellido']); ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['segundo_apellido']); ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['telefono_1']); ?></td>
+                                            <td><?php echo $vendedor['telefono_2'] ?: 'N/A'; ?></td>
+                                            <td><?php echo htmlspecialchars($vendedor['correo']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <p class="text-muted">No hay vendedores asociados.</p>
+                <?php endif; ?>
             </div>
         </div>
-    </div>
+    <?php endforeach; ?>
 </main>
 
 <?php include_once 'footer.php'; ?>
-
-<script>
-    // Simular búsqueda
-    document.getElementById('searchForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const query = document.getElementById('searchInput').value;
-
-        // Aquí podrías agregar la lógica para buscar proveedores/productos desde el servidor
-        if (query.toLowerCase() === "pintura" || query.toLowerCase() === "excelencia") {
-            document.getElementById('empresaInfo').style.display = 'block';
-            document.getElementById('vendedoresInfo').style.display = 'block';
-        } else {
-            alert("No se encontraron resultados para la búsqueda.");
-            document.getElementById('empresaInfo').style.display = 'none';
-            document.getElementById('vendedoresInfo').style.display = 'none';
-        }
-    });
-</script>
