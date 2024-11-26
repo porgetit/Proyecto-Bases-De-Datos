@@ -1,3 +1,4 @@
+<?php date_default_timezone_set("America/Bogota"); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,7 +219,7 @@
         switch (page_title) {
             case "Inicio":
                 document.getElementById('IniciarSesion').addEventListener('click', function() {
-                    redirectToURL('./modules/login.php');
+                    redirectToURL('./modules/ventas.php');
                 });
 
                 document.getElementById('Registrarse').addEventListener('click', function() {

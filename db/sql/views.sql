@@ -57,3 +57,13 @@ select
 from proveedores left join vendedores on proveedores.RUT = vendedores.id_proveedor
 order by proveedores.nombre, vendedores.primer_nombre;
 
+-- Vista para el selector de productos en registro_venta.php
+create view registro_venta_productos as
+select 
+	productos.ID as id,
+	productos.nombre, 
+    categorias.nombre as categoria, 
+    productos.precio_compra, 
+    productos.porcentaje_ganancia as ganancia
+from productos join categorias on productos.id_categoria = categorias.ID
+order by productos.nombre;

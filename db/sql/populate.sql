@@ -49,11 +49,11 @@ INSERT INTO Productos (nombre, descripcion, id_categoria, precio_compra, porcent
     ('Guantes de seguridad', 'Guantes de seguridad para trabajo industrial', 8, 6.00, 25, 100, 10);
 
 -- Insertar datos en la tabla Ventas
-INSERT INTO Ventas (codigo_venta, id_producto, id_cliente, id_usuario, id_metodo_pago, fecha, notas)
+INSERT INTO Ventas (codigo_venta, id_producto, id_cliente, id_usuario, id_metodo_pago, fecha, cantidad, notas)
 VALUES
-    ('20241118-1', 1, '1234567890', '1234567890', 1, '2024-11-18', 'Envío a domicilio'),
-    ('20241118-2', 2, '9876543210', '9876543210', 2, '2024-11-18', 'Recogida en tienda'),
-    ('20241118-3', 3, '1122334455', '1122334455', 3, '2024-11-18', 'Pago a consignación');
+    ('20241118-1', 1, '1234567890', '1234567890', 1, '2024-11-18', 10, 'Envío a domicilio'),
+    ('20241118-2', 2, '9876543210', '9876543210', 2, '2024-11-18', 5, 'Recogida en tienda'),
+    ('20241118-3', 3, '1122334455', '1122334455', 3, '2024-11-18', 2, 'Pago a consignación');
 
 -- Insertar datos en la tabla Proveedores
 INSERT INTO Proveedores (RUT, nombre, telefono1, telefono2, correo, direccion)
